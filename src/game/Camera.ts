@@ -5,6 +5,7 @@ import { Point } from '@/types/Point.ts'
 export class Camera {
     private camera: THREE.PerspectiveCamera
     private lookAtPoint: Point = { x: 0, y: 0, z: 0}
+    private initialPosition: Point = { x: 0, y: 10, z: 10}
 
     constructor() {
         const width = window.innerWidth,
@@ -16,9 +17,7 @@ export class Camera {
             0.01,
             1000,
         )
-        camera.position.x = 0
-        camera.position.y = 10
-        camera.position.z = 10
+        camera.position.set(this.initialPosition.x, this.initialPosition.y, this.initialPosition.z)
         camera.lookAt(this.lookAtPoint.x, this.lookAtPoint.y, this.lookAtPoint.z)
         camera.up.set(0, 1, 0);
         this.camera = camera
@@ -31,7 +30,7 @@ export class Camera {
         })
     }
 
-    getThreeObject() {
+    toThreeObject() {
         return this.camera
     }
 
@@ -50,6 +49,10 @@ export class Camera {
                 this.lookAtPoint = lookAtPoint
             }
         });
+    }
+
+    moveToInitialPosition(lookAt?: Point) {
+        this.moveTo(this.initialPosition, lookAt)
     }
 }
 

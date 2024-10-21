@@ -6,7 +6,8 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
 import { Ship } from '@/game/Ship.ts'
 import { CellStatus, CellStatuses } from '@/constants/CellStatus.ts'
-import { setCursorType } from '@/utils/dom/setCursorType.ts'
+import { ShipEventListener } from '@/utils/event/ShipEventListener.ts'
+import { BoardEventListener } from '@/utils/event/BoardEventListener.ts'
 
 export class Board {
     private boxSize = 2
@@ -14,6 +15,7 @@ export class Board {
     private threeObjectsLines: Array<Line2> = []
     private boardSize = 10
     private ships: Array<Ship>
+    private editingEventListenerRemovers: Array<Function> = []
     private cells: Array<Array<CellStatus>> = createArray(
         this.boardSize,
         createArray(this.boardSize, CellStatuses.EMPTY),
@@ -94,11 +96,71 @@ export class Board {
         }
     }
 
+    private fitShip(shipId: number) {
+        const ship = this.ships.find(ship => ship.isShip(shipId))
+        if(!ship) return
+
+        const shipPosition = ship.getPosition()
+        const nearestPosition = {
+            x: Math.round(shipPosition.x),
+            y: ship.getPosition().y,
+            z: Math.round(shipPosition.z),
+        }
+
+        const shipNeedsXOffset = ship.getWidth() % 2 !== 0
+        const shipNeedsZOffset = ship.getHeight() % 2 !== 0
+        let offsetX = 0
+        let offsetZ = 0
+        if(shipNeedsXOffset) {
+            offsetX = shipPosition.x < nearestPosition.x ? -0.5 : 0.5
+        }
+        if(shipNeedsZOffset) {
+            offsetZ = shipPosition.z < nearestPosition.z ? -0.5 : 0.5
+        }
+
+        ship.setPosition({
+            x: this.formatShipXPosition(ship, nearestPosition.x + offsetX),
+            y: ship.getPosition().y,
+            z: this.formatShipZPosition(ship, nearestPosition.z + offsetZ),
+        })
+    }
+
+    private formatShipXPosition(ship: Ship, position: number) {
+        const width = ship.getWidth()
+        if((position - (width / 2)) < -5) return -5 + (width / 2)
+        if((position + (width / 2)) > 5) return 5 - (width / 2)
+        return position
+    }
+
+    private formatShipZPosition(ship: Ship, position: number) {
+        const height = ship.getHeight()
+        if((position - (height / 2)) < -5) return -5 + (height / 2)
+        if((position + (height /2)) > 5) return 5 - (height / 2)
+        return position
+    }
+
+    startEditing() {
+        this.ships.forEach(ship => ship.startEditing())
+        const removeOnDropShipListener = BoardEventListener.addEventListener('onDropShip', (shipId: number) => {
+           this.fitShip(shipId)
+        })
+        this.editingEventListenerRemovers.push(removeOnDropShipListener)
+    }
+
+    endEditing() {
+        this.ships.forEach(ship => ship.endEditing())
+        this.editingEventListenerRemovers.forEach(editingEventListenerRemover => editingEventListenerRemover())
+    }
+
+    getShipElements() {
+        return this.ships.map(ship => ship.toThreeObject())
+    }
+
     toThreeObjects() {
         return [
             ...this.threeObjects.flatMap(object => object),
             ...this.threeObjectsLines,
-            ...this.ships.map(ship => ship.getThreeObject()),
+            ...this.ships.map(ship => ship.toThreeObject()),
         ]
     }
 }
