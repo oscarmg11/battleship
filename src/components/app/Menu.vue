@@ -1,9 +1,10 @@
 <script setup lang='ts'>
 import Button from '@/components/Button.vue'
 import { camera } from '@/game/Camera.ts'
+import { game } from '@/game/Game.ts'
 
 const setupShips = () => {
-    camera.moveTo({ x: 0, y: 10, z: 0 })
+    game.setupGame()
 }
 
 </script>
