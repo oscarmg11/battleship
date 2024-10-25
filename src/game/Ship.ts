@@ -7,26 +7,40 @@ import { newId } from '@/utils/newId.ts'
 import { setCursorType } from '@/utils/dom/setCursorType.ts'
 import { ShipEventListener } from '@/utils/event/ShipEventListener.ts'
 import { BoardEventListener } from '@/utils/event/BoardEventListener.ts'
+import { ShipEditionValidator } from '@/game/ship/services/ShipEditionValidator.ts'
 
 export class Ship {
-    private threeObject: THREE.Mesh
+    private threeGroup: THREE.Group
     private size
     private rotation: ShipRotation = ShipRotations.HORIZONTAL
-    private id: number
     private isMouseOver = false
     private dragging = false
     private editing = false
     private editingEventListenerRemovers: Array<Function> = []
+    id: number
 
     constructor(shipShape: ShipShape) {
         this.size = this.getShipSize(shipShape)
         const material = new THREE.MeshStandardMaterial( {
             color: 0xffffff,
-        } );
-        const geometry = new THREE.BoxGeometry(this.size, 0.8, 0.8)
-        const threeObject = new THREE.Mesh( geometry, material );
-        this.threeObject = threeObject
-        this.id = threeObject.id
+        });
+
+        const boxSize = 1
+
+        const group = new THREE.Group()
+        const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize)
+        group.userData = {
+            isShip: true,
+        }
+
+        for(let i = -(this.size/2) + 0.5; i < (this.size/2); i++){
+            const threeObject = new THREE.Mesh( geometry, material );
+            threeObject.position.set(i * boxSize,0,0);
+            group.add(threeObject)
+        }
+
+        this.threeGroup = group
+        this.id = group.id
     }
 
     private getShipSize(shipShape: ShipShape): number {
@@ -36,6 +50,16 @@ export class Ship {
             case ShipShapes.SHORT: return 3
             case ShipShapes.SMALL: return 2
             default: throw new Error(`shipShape=${shipShape} not supported`)
+        }
+    }
+
+    clearCollisionMarks(){
+        const material = new THREE.MeshStandardMaterial( {
+            color: 0xffffff,
+        });
+        for(const object of this.threeGroup.children as Array<THREE.Mesh>) {
+            object.material = material
+            object.material.needsUpdate = true;
         }
     }
 
@@ -90,11 +114,15 @@ export class Ship {
         if(!this.editing) return
         if(!this.dragging) setCursorType('grab')
         this.isMouseOver = true
+        ShipEditionValidator.startEditing(this.id)
     }
 
     startDragging() {
         if(!this.isMouseOver || !this.editing) return
+        if(!ShipEditionValidator.canEditShip(this.id)) return
+        BoardEventListener.updateEventListener('onDragShip', this.id)
         setCursorType('grabbing')
+        this.clearCollisionMarks()
         this.dragging = true
     }
 
@@ -109,31 +137,43 @@ export class Ship {
         if(!this.isMouseOver || !this.editing) return
         setCursorType('default')
         this.isMouseOver = false
+        ShipEditionValidator.endEditing()
     }
 
     dragTo(point: Point) {
         if(!this.dragging || !this.editing) return
         const position = new THREE.Vector3(point.x, point.y, point.z)
-        this.threeObject.position.copy(position);
+        this.threeGroup.position.copy(position);
     }
 
     setPosition(point: Point){
-        this.threeObject.position.set(point.x, point.y, point.z)
+        this.threeGroup.position.set(point.x, point.y, point.z)
     }
 
     getPosition(): Point{
         return {
-            x: this.threeObject.position.x,
-            y: this.threeObject.position.y,
-            z: this.threeObject.position.z,
+            x: this.threeGroup.position.x,
+            y: this.threeGroup.position.y,
+            z: this.threeGroup.position.z,
         }
     }
 
     rotate(){
         if(!this.editing) return
         this.rotation = this.rotation === ShipRotations.VERTICAL ? ShipRotations.HORIZONTAL : ShipRotations.VERTICAL
-        this.threeObject.rotation.y = this.threeObject.rotation.y + (Math.PI / 2)
+        this.threeGroup.rotation.y = this.threeGroup.rotation.y + (Math.PI / 2)
         BoardEventListener.updateEventListener('onDropShip', this.id)
+    }
+
+    markObjectColliding(id: number){
+        const material = new THREE.MeshStandardMaterial( {
+            color: 0xfa0202,
+        });
+        for(const object of this.threeGroup.children as Array<THREE.Mesh>) {
+            if(object.id !== id) continue
+            object.material = material
+            object.material.needsUpdate = true;
+        }
     }
 
     getSize(){
@@ -151,10 +191,14 @@ export class Ship {
     }
 
     isShip(id: number){
-        return this.id === id
+        return id === this.id
     }
 
     toThreeObject(){
-        return this.threeObject
+        return this.threeGroup
+    }
+
+    toThreeObjects(){
+        return this.threeGroup.children
     }
 }

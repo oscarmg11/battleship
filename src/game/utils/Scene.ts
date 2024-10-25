@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { isDev } from '@/utils/env/isDev.ts'
-import { camera, Camera } from '@/game/Camera.ts'
+import { camera, Camera } from '@/game/utils/Camera.ts'
 import { ShipEventListener } from '@/utils/event/ShipEventListener.ts'
 
 export class Scene {
@@ -42,7 +42,7 @@ export class Scene {
 
             const objectsIntersected = intersects.map(intersect => intersect.object)
 
-            ShipEventListener.updateEventListener('onClick', objectsIntersected[0].id)
+            ShipEventListener.updateEventListener('onClick', objectsIntersected[0].parent?.id!)
         });
 
         if(isDev()){
@@ -61,7 +61,7 @@ export class Scene {
             const intersects = raycaster.intersectObjects(this.elementsToTrackPosition);
             const objectsIntersected = intersects.map(intersect => intersect.object)
 
-            if(objectsIntersected.length) ShipEventListener.updateEventListener('onMouseOver', objectsIntersected[0].id)
+            if(objectsIntersected.length) ShipEventListener.updateEventListener('onMouseOver', objectsIntersected[0].parent?.id!)
             else ShipEventListener.updateEventListener('onMouseLeave')
 
             const planeIntersects = raycaster.intersectObject(plane);
@@ -99,12 +99,9 @@ export class Scene {
         this.elementsToTrackPosition = []
     }
 
-    // private trackMousePosition(){
-    //     console.log('this = ', this)
-    //     console.log('this.mousePosition = ', this.mousePosition)
-    //     this.mousePosition.x = (event.clientX / window.innerWidth) * 2 - 1;
-    //     this.mousePosition.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    // }
+    toThreeObject(){
+        return this.scene
+    }
 }
 
 export const scene = new Scene(camera)
