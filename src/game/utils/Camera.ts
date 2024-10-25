@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import gsap from 'gsap';
-import { Point } from '@/types/Point.ts'
+import { Point } from '@/game/types/Point.ts'
 
 export class Camera {
     private camera: THREE.PerspectiveCamera

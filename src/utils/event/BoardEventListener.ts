@@ -1,6 +1,6 @@
 import { EventListener } from '@/utils/event/EventListener.ts'
 import * as THREE from 'three'
-import { Point } from '@/types/Point.ts'
+import { Point } from '@/game/types/Point.ts'
 
 export class BoardEventListener extends EventListener {
 
