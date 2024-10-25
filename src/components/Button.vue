@@ -2,7 +2,7 @@
 const props = defineProps<{ class?: string }>()
 const emit = defineEmits(['click'])
 
-const handleClick = e => {
+const handleClick = () => {
     emit('click')
 }
 
@@ -15,7 +15,7 @@ const handleClick = e => {
 <style scoped>
 .button {
     border: 1px solid white;
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 4px 10px;
     display: flex;
     flex-direction: row;
