@@ -9,7 +9,7 @@ import { CellStatus, CellStatuses } from '@/constants/CellStatus.ts'
 import { BoardEventListener } from '@/utils/event/BoardEventListener.ts'
 import { create2DText } from '@/utils/text/create2DText.ts'
 import { ShipCollisionValidator } from '@/game/ship/services/ShipCollisionValidator.ts'
-import { ShipShapes } from '@/constants/ShipShapes.ts'
+import { ShipShapes } from '@/game/ship/constants/ShipShapes.ts'
 
 export class Board {
     private boxSize = 2
