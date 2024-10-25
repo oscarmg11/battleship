@@ -13,7 +13,7 @@ export function create2DText(text: string, options?: Options): THREE.Mesh {
     }
 
     context.fillStyle = options?.color ?? 'white';
-    context.font = `${letterSize}px sans-serif`;
+    context.font = `${letterSize}px 'Oswald'`;
     context.fillText(text, 200, 1024);
 
     const texture = new THREE.CanvasTexture(canvas);
