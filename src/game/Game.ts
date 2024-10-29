@@ -1,8 +1,6 @@
 import { Board } from '@/game/Board.ts'
-import { Ship } from '@/game/Ship.ts'
 import { scene } from '@/game/utils/Scene.ts'
 import { camera } from '@/game/utils/Camera.ts'
-import { ShipShapes } from '@/constants/ShipShapes.ts'
 
 class Game {
     private board: Board
@@ -19,6 +17,14 @@ class Game {
         camera.moveTo({ x: 0, y: 15, z: 0 })
         scene.addElementsToTrack(this.board.getShipElements() ?? [])
         this.board.startEditing()
+    }
+
+    isGameReadyToStart() {
+        return this.board.isBoardReady()
+    }
+
+    getBoardErrorMessage() {
+        return this.board.getBoardErrorMessage()
     }
 
     finishSetupGame() {

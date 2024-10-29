@@ -10,12 +10,14 @@ import { BoardEventListener } from '@/utils/event/BoardEventListener.ts'
 import { create2DText } from '@/utils/text/create2DText.ts'
 import { ShipCollisionValidator } from '@/game/ship/services/ShipCollisionValidator.ts'
 import { ShipShapes } from '@/game/ship/constants/ShipShapes.ts'
+import { translate } from '@/utils/text/translate.ts'
 
 export class Board {
     private boxSize = 2
     private threeGroup: THREE.Group
     private boardSize = 10
     private ships: Array<Ship>
+    private shipIdsReady: Array<number> = []
     private editingEventListenerRemovers: Array<Function> = []
     private cells: Array<Array<CellStatus>> = createArray(
         this.boardSize,
@@ -28,7 +30,6 @@ export class Board {
         this.threeGroup = new THREE.Group()
         this.initializeBoard()
         this.initializeShips()
-
     }
 
     private initializeBoard(){
@@ -145,7 +146,9 @@ export class Board {
             z: this.formatShipZPosition(ship, nearestPosition.z + offsetZ),
         })
 
-        this.ships.forEach(ShipCollisionValidator.checkCollision)
+        const markCollision = ShipCollisionValidator.markCollision.bind(ShipCollisionValidator);
+        this.ships.forEach(markCollision)
+        this.shipIdsReady.push(shipId)
     }
 
     private formatShipXPosition(ship: Ship, position: number) {
@@ -160,6 +163,15 @@ export class Board {
         if((position - (height / 2)) < -5) return -5 + (height / 2)
         if((position + (height /2)) > 5) return 5 - (height / 2)
         return position
+    }
+
+    private areShipsReady() {
+        return this.ships.every(ship => this.shipIdsReady.some(shipId => ship.isShip(shipId)))
+    }
+
+    private thereAreNoCollision() {
+        const isColliding = ShipCollisionValidator.isColliding.bind(ShipCollisionValidator);
+        return !this.ships.some(isColliding)
     }
 
     startEditing() {
@@ -180,6 +192,16 @@ export class Board {
 
     getShipElements() {
         return this.ships.map(ship => ship.toThreeObject())
+    }
+
+    isBoardReady() {
+        return this.areShipsReady() && this.thereAreNoCollision()
+    }
+
+    getBoardErrorMessage() {
+        if(!this.areShipsReady()) return translate('There are ships missing to place.')
+        if(!this.thereAreNoCollision()) return translate('There are ships colliding.')
+        return ''
     }
 
     toThreeObjects() {
