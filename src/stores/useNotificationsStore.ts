@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { Notification } from '@/types/Notification.ts'
 
 export const useNotificationsStore = defineStore('counter', () => {
     const notifications = ref<Array<Notification>>([])
@@ -15,7 +16,3 @@ export const useNotificationsStore = defineStore('counter', () => {
 
     return { notifications, showNotification, removeNotification }
 })
-
-type Notification = {
-    message: string;
-}
