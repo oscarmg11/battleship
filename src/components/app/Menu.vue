@@ -16,7 +16,7 @@ const setupShips = () => {
             return game.finishSetupGame()
         }
         store.showNotification({
-            title: translate('Board not ready'),
+            title: translate('Board is not ready'),
             message: game.getBoardErrorMessage()
         })
         return
