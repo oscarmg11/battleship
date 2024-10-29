@@ -109,10 +109,13 @@ export class Board {
     }
 
     private initializeShips() {
+        const shipsLabel = create2DText(translate('Your ships'), {  width: 10 })
+        shipsLabel.position.set(-7.5, 0, -5.5)
         for(let i = 0; i < this.ships.length; i++){
             const ship = this.ships[i]
             ship.setPosition({ x: - 8 - (ship.getSize() / 2) , y: 0, z: -3.5 + i + (i * 0.5)})
         }
+        this.threeGroup.add(shipsLabel)
     }
 
     private fitShip(shipId: number) {

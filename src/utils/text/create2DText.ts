@@ -19,7 +19,7 @@ export function create2DText(text: string, options?: Options): THREE.Mesh {
     const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
 
-    const geometry = new THREE.PlaneGeometry(options?.size ?? 1, options?.size ?? 1);
+    const geometry = new THREE.PlaneGeometry(options?.size ?? options?.width ?? 1, options?.size ?? options?.height ?? 1);
     texture.minFilter = THREE.LinearFilter;
     const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
     const plane = new THREE.Mesh(geometry, material);
@@ -30,5 +30,7 @@ export function create2DText(text: string, options?: Options): THREE.Mesh {
 
 type Options = {
     color?: string;
-    size?: number
+    size?: number;
+    width?:number;
+    height?:number;
 }
