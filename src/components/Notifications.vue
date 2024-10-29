@@ -5,8 +5,6 @@ import Notification from '@/components/Notification.vue'
 
 const store = useNotificationsStore()
 
-console.log('notifications = ', store.notifications)
-
 </script>
 
 <template>
@@ -21,8 +19,8 @@ console.log('notifications = ', store.notifications)
         flex-direction: column;
         gap: 10px;
         position: absolute;
-        bottom: 2vh;
-        right: 2vw;
+        bottom: 5vh;
+        right: 5vw;
         z-index: 10;
         max-height: 50vh;
         width: 30vw;
