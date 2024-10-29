@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { isObjectFromShip } from '@/game/ship/utils/isObjectFromShip.ts'
 
 export class ShipCollisionValidator {
-    static checkCollision(ship: Ship): void {
+    static getCollidingObjectIds(ship: Ship): Array<number> {
         const shrinkVector = new THREE.Vector3(-0.2, -0.2, -0.2)
         const objects = ship.toThreeObjects()
         const objectsGroup = ship.toThreeObject()
@@ -17,20 +17,32 @@ export class ShipCollisionValidator {
             }
         })
 
+        const collidingObjectIds: Array<number> = []
         const threeScene = scene.toThreeObject()
-        threeScene.children.forEach((objectInScene) => {
-            if(!isObjectFromShip(objectInScene)) return
-            if(objectsGroup.id === objectInScene.id) return
+        for(const objectInScene of threeScene.children) {
+            if(!isObjectFromShip(objectInScene)) continue
+            if(objectsGroup.id === objectInScene.id) continue
 
             const objectInSceneCollisionBox = new THREE.Box3().setFromObject(objectInScene).expandByVector(shrinkVector);
 
             for(const shipCollisionBox of shipCollisionBoxes) {
                 if (shipCollisionBox.box.intersectsBox(objectInSceneCollisionBox)) {
-                    ship.markObjectColliding(shipCollisionBox.id)
+                    collidingObjectIds.push(shipCollisionBox.id)
                 }
             }
+        }
 
-        });
+        return collidingObjectIds
+    }
+
+    static isColliding(ship: Ship): boolean {
+        return this.getCollidingObjectIds(ship).length > 0
+    }
+
+    static markCollision(ship: Ship): void {
+        this.getCollidingObjectIds(ship).forEach((collidingObjectId) => {
+            ship.markObjectColliding(collidingObjectId);
+        })
     }
 }
 
