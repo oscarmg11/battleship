@@ -4,8 +4,8 @@ import { Point } from '@/game/types/Point.ts'
 
 export class Camera {
     private camera: THREE.PerspectiveCamera
-    private lookAtPoint: Point = { x: 0, y: 0, z: 0}
-    private initialPosition: Point = { x: 0, y: 10, z: 10}
+    private lookAtPoint: Point = { x: 0, y: 0, z: -10}
+    private initialPosition: Point = { x: 0, y: 10, z: 12}
 
     constructor() {
         const width = window.innerWidth,
@@ -35,20 +35,31 @@ export class Camera {
     }
 
     moveTo(to: Point, lookAt?: Point) {
-        const lookAtPoint = lookAt ?? this.lookAtPoint
         gsap.to(this.camera.position, {
             duration: 2,
             x: to.x,
             y: to.y,
             z: to.z,
             ease: "power2.inOut",
-            onUpdate: () => {
-                this.camera.lookAt(lookAtPoint.x, lookAtPoint.y, lookAtPoint.z);
-            },
-            onComplete: () => {
-                this.lookAtPoint = lookAtPoint
-            }
         });
+
+        if(lookAt){
+            const lookAtPoint = new THREE.Vector3(this.lookAtPoint.x, this.lookAtPoint.y, this.lookAtPoint.z);
+            gsap.to(lookAtPoint, {
+                duration: 2,
+                x: lookAt.x,
+                y: lookAt.y,
+                z: lookAt.z,
+                ease: "power2.inOut",
+                onUpdate: () => {
+                    this.camera.lookAt(lookAtPoint)
+                },
+                onComplete: () => {
+                    this.lookAtPoint = lookAt
+                }
+            });
+        }
+
     }
 
     moveToInitialPosition(lookAt?: Point) {
