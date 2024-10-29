@@ -78,7 +78,9 @@ export class Scene {
         const renderer = new THREE.WebGLRenderer({ antialias: true })
         renderer.setSize(this.width, this.height)
         renderer.setAnimationLoop(animate)
-        document.body.appendChild(renderer.domElement)
+
+        const gameContainer = document.getElementById('game')
+        gameContainer?.appendChild(renderer.domElement)
 
         this.scene = scene
     }
