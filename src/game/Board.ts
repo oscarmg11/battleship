@@ -11,28 +11,23 @@ import { create2DText } from '@/utils/text/create2DText.ts'
 import { ShipCollisionValidator } from '@/game/ship/services/ShipCollisionValidator.ts'
 import { ShipShapes } from '@/game/ship/constants/ShipShapes.ts'
 import { translate } from '@/utils/text/translate.ts'
+import { Point } from '@/game/types/Point.ts'
 
 export class Board {
     private boxSize = 2
-    private threeGroup: THREE.Group
+    protected threeGroup: THREE.Group
     private boardSize = 10
-    private ships: Array<Ship>
-    private shipIdsReady: Array<number> = []
-    private editingEventListenerRemovers: Array<Function> = []
     private cells: Array<Array<CellStatus>> = createArray(
         this.boardSize,
         createArray(this.boardSize, CellStatuses.EMPTY),
     )
 
-    constructor() {
-        const shipShapes = [ShipShapes.LONG, ShipShapes.MEDIUM, ShipShapes.SHORT, ShipShapes.SHORT, ShipShapes.SMALL]
-        this.ships =  shipShapes.map(shipShape => new Ship(shipShape))
+    constructor(boardCenter: Point) {
         this.threeGroup = new THREE.Group()
-        this.initializeBoard()
-        this.initializeShips()
+        this.initializeBoard(boardCenter)
     }
 
-    private initializeBoard(){
+    private initializeBoard(boardCenter: Point){
         const material = new THREE.MeshBasicMaterial({
             color: 0x000000,
             opacity: 0,
@@ -80,8 +75,8 @@ export class Board {
 
         const halfBoard  = Math.floor(this.boardSize/2)
 
-        for (let i = -halfBoard + 1; i < halfBoard; i++) {
-            for (let j = -halfBoard + 1; j < halfBoard; j++) {
+        for (let i = -halfBoard + 1 + boardCenter.x; i < halfBoard + boardCenter.x; i++) {
+            for (let j = -halfBoard + 1 + boardCenter.z; j < halfBoard + boardCenter.z; j++) {
                 const cube = new THREE.Mesh(geometry, material)
                 const cubeEdges = new Line2(lineGeometry, lineMaterial)
 
@@ -95,122 +90,20 @@ export class Board {
 
         let asciiLetter = 'A'.charCodeAt(0)
         const letterSize = 0.8
-        for (let i =0; i < this.boardSize; i++) {
+        for (let i = 0; i < this.boardSize; i++) {
             const letter = create2DText(String.fromCharCode(asciiLetter + i), { size: letterSize })
-            letter.position.set(-halfBoard - 1, 0, i - halfBoard + 0.4)
+            letter.position.set(-halfBoard - 1, 0, i - halfBoard + 0.4 + boardCenter.z)
 
             const number = i +1
             const numberText = create2DText(number.toString(), { size: letterSize })
-            numberText.position.set(i - halfBoard +  0.5,0, -halfBoard - 1)
+            numberText.position.set(i - halfBoard +  0.5 + boardCenter.x,0, -halfBoard - 1 + boardCenter.z)
 
             this.threeGroup.add(letter)
             this.threeGroup.add(numberText)
         }
     }
 
-    private initializeShips() {
-        const shipsLabel = create2DText(translate('Your ships'), {  width: 10 })
-        shipsLabel.position.set(-7.5, 0, -5.5)
-        for(let i = 0; i < this.ships.length; i++){
-            const ship = this.ships[i]
-            ship.setPosition({ x: - 8 - (ship.getSize() / 2) , y: 0, z: -3.5 + i + (i * 0.5)})
-        }
-        this.threeGroup.add(shipsLabel)
-    }
-
-    private fitShip(shipId: number) {
-        const ship = this.ships.find(ship => ship.isShip(shipId))
-        if(!ship) return
-
-        this.ships.forEach(ship => ship.clearCollisionMarks())
-
-        const shipPosition = ship.getPosition()
-        const nearestPosition = {
-            x: Math.round(shipPosition.x),
-            y: ship.getPosition().y,
-            z: Math.round(shipPosition.z),
-        }
-
-        const shipNeedsXOffset = ship.getWidth() % 2 !== 0
-        const shipNeedsZOffset = ship.getHeight() % 2 !== 0
-
-        let offsetX = 0
-        let offsetZ = 0
-        if(shipNeedsXOffset) {
-            offsetX = shipPosition.x < nearestPosition.x ? -0.5 : 0.5
-        }
-        if(shipNeedsZOffset) {
-            offsetZ = shipPosition.z < nearestPosition.z ? -0.5 : 0.5
-        }
-
-        ship.setPosition({
-            x: this.formatShipXPosition(ship, nearestPosition.x + offsetX),
-            y: ship.getPosition().y,
-            z: this.formatShipZPosition(ship, nearestPosition.z + offsetZ),
-        })
-
-        const markCollision = ShipCollisionValidator.markCollision.bind(ShipCollisionValidator);
-        this.ships.forEach(markCollision)
-        this.shipIdsReady.push(shipId)
-    }
-
-    private formatShipXPosition(ship: Ship, position: number) {
-        const width = ship.getWidth()
-        if((position - (width / 2)) < -5) return -5 + (width / 2)
-        if((position + (width / 2)) > 5) return 5 - (width / 2)
-        return position
-    }
-
-    private formatShipZPosition(ship: Ship, position: number) {
-        const height = ship.getHeight()
-        if((position - (height / 2)) < -5) return -5 + (height / 2)
-        if((position + (height /2)) > 5) return 5 - (height / 2)
-        return position
-    }
-
-    private areShipsReady() {
-        return this.ships.every(ship => this.shipIdsReady.some(shipId => ship.isShip(shipId)))
-    }
-
-    private thereAreNoCollision() {
-        const isColliding = ShipCollisionValidator.isColliding.bind(ShipCollisionValidator);
-        return !this.ships.some(isColliding)
-    }
-
-    startEditing() {
-        this.ships.forEach(ship => ship.startEditing())
-        const removeOnDropShipListener = BoardEventListener.addEventListener('onDropShip', (shipId: number) => {
-           this.fitShip(shipId);
-        })
-        const removeOnDragShipListener = BoardEventListener.addEventListener('onDragShip', (shipId: number) => {
-        })
-        this.editingEventListenerRemovers.push(removeOnDropShipListener)
-        this.editingEventListenerRemovers.push(removeOnDragShipListener)
-    }
-
-    endEditing() {
-        this.ships.forEach(ship => ship.endEditing())
-        this.editingEventListenerRemovers.forEach(editingEventListenerRemover => editingEventListenerRemover())
-    }
-
-    getShipElements() {
-        return this.ships.map(ship => ship.toThreeObject())
-    }
-
-    isBoardReady() {
-        return this.areShipsReady() && this.thereAreNoCollision()
-    }
-
-    getBoardErrorMessage() {
-        if(!this.areShipsReady()) return translate('There are ships missing to place.')
-        if(!this.thereAreNoCollision()) return translate('There are ships colliding.')
-        return ''
-    }
-
-    toThreeObjects() {
-        return [
-            this.threeGroup,
-            ...this.ships.map(ship => ship.toThreeObject())
-        ]
+    toThreeObject() {
+        return this.threeGroup
     }
 }
