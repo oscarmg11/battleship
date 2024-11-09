@@ -2,7 +2,7 @@
 export class EventListener {
     private static subscribers: Array<Subscriber> = []
 
-    static addEventListener(event: string, fn: (data: any) => void) {
+    static addEventListener(event: string, fn: (data?: any) => void) {
         this.subscribers.push({ event, callback: fn })
         return () => {
             this.subscribers = this.subscribers.filter(subscriber => subscriber.callback !== fn)
