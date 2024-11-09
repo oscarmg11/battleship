@@ -6,6 +6,7 @@ export class Camera {
     private camera: THREE.PerspectiveCamera
     private lookAtPoint: Point = { x: 0, y: 0, z: -10}
     private initialPosition: Point = { x: 0, y: 10, z: 12}
+    private initialLookAtPoint: Point = this.lookAtPoint
 
     constructor() {
         const width = window.innerWidth,
@@ -63,7 +64,7 @@ export class Camera {
     }
 
     moveToInitialPosition(lookAt?: Point) {
-        this.moveTo(this.initialPosition, lookAt)
+        this.moveTo(this.initialPosition, lookAt ?? this.initialLookAtPoint)
     }
 }
 
