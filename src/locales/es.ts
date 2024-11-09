@@ -9,4 +9,5 @@ export const es = {
     'Double click on the ships to rotate them.': 'Doble click en los barcos para rotarlos.',
     'Press "Ready" button to start the game.': 'Presiona el botón "Listo" para empezar el juego.',
     'Your ships': 'Tus barcos',
+    'Waiting for opponent': 'Esperando al oponente'
 }

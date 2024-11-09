@@ -1,4 +1,3 @@
-import { Board } from '@/game/Board.ts'
 import { scene } from '@/game/utils/Scene.ts'
 import { camera } from '@/game/utils/Camera.ts'
 import { MainBoard } from '@/game/MainBoard.ts'
