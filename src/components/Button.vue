@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{ class?: string }>()
+const props = defineProps<{ class?: string, disabled?: boolean }>()
 const emit = defineEmits(['click'])
 
 const handleClick = () => {
@@ -8,7 +8,7 @@ const handleClick = () => {
 
 </script>
 <template>
-    <button class="button" :class="props.class" @click="handleClick">
+    <button class="button" :class="props.class" @click="handleClick" :disabled='props.disabled'>
         <slot />
     </button>
 </template>
@@ -25,5 +25,15 @@ const handleClick = () => {
     font-size: 20px;
     font-family: 'Oswald', sans-serif;
     cursor: pointer;
+    background-color: white;
+    color: black;
+}
+
+.button:disabled {
+    background-color: #c2c2c2;
+    border: 1px solid #c2c2c2;
+    color: black;
+    cursor: default;
+
 }
 </style>
