@@ -4,7 +4,10 @@ const props = defineProps<{ variant?: 'title', class?: string }>()
 </script>
 
 <template>
-    <span class='text' :class="[{ title: props.variant === 'title' }, props.class]">
+    <h1 v-if="props.variant === 'title'" class='text title' :class="[props.class]">
+        <slot />
+    </h1>
+    <span v-if="!props.variant" class='text' :class="[{ title: props.variant === 'title' }, props.class]">
         <slot />
     </span>
 </template>
