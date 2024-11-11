@@ -26,6 +26,7 @@ const setupShips = () => {
         })
         return
     }
+
     game.setupGame()
     settingUpGame.value = true
 }
@@ -34,10 +35,7 @@ const setupShips = () => {
 
 <template>
     <nav class="nav">
-        <div class='waitingForEnemy' v-if='gameReady && !enemyReady'>
-            <Loader :size='20' />
-            <Text>{{ translate('Waiting for opponent') }}</Text>
-        </div>
+        <Loader :size='20' :text="translate('Waiting for opponent')"  v-if='gameReady && !enemyReady' />
         <Button @click='setupShips' v-if='!gameReady' class='button'>{{ settingUpGame ? translate('Ready') : translate('Setup ships')   }}</Button>
     </nav>
     <GameRules v-if='settingUpGame && !gameReady'  />
