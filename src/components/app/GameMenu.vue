@@ -7,8 +7,11 @@ import { useNotificationsStore } from '@/stores/useNotificationsStore.ts'
 import GameRules from '@/components/app/GameRules.vue'
 import Loader from '@/components/Loader.vue'
 import Text from '@/components/Text.vue'
+import { useGameStore } from '@/stores/useGameStore.js'
+import CopyIcon from '@/icons/CopyIcon.vue'
 
 const store = useNotificationsStore()
+const gameStore = useGameStore()
 
 const settingUpGame = ref(false)
 const gameReady = ref(false)
@@ -31,12 +34,23 @@ const setupShips = () => {
     settingUpGame.value = true
 }
 
+const copyRoomId = () => {
+    if(!gameStore.game) return
+    navigator.clipboard.writeText(gameStore.game.roomId)
+}
+
 </script>
 
 <template>
     <nav class="nav">
+        <div class='gameInfo' v-if='!!gameStore.game'>
+            <Text>{{ translate('Battle: ') + gameStore.game?.roomId }}</Text>
+            <Button class='iconButton' @click='copyRoomId'>
+                <CopyIcon />
+            </Button>
+        </div>
         <Loader :size='20' :text="translate('Waiting for opponent')"  v-if='gameReady && !enemyReady' />
-        <Button @click='setupShips' v-if='!gameReady' class='button'>{{ settingUpGame ? translate('Ready') : translate('Setup ships')   }}</Button>
+        <Button @click='setupShips' v-if='!gameReady' class='setupButton'>{{ settingUpGame ? translate('Ready') : translate('Setup ships')   }}</Button>
     </nav>
     <GameRules v-if='settingUpGame && !gameReady'  />
 </template>
@@ -53,15 +67,29 @@ const setupShips = () => {
     justify-content: center;
 }
 
-.button{
+.setupButton{
     position: absolute;
     right: 5vw;
 }
 
-.waitingForEnemy {
+.gameInfo {
+    position: absolute;
+    left: 5vw;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+}
+
+.iconButton {
+    background-color: transparent;
+    color: white;
+    border-radius: 30px;
+    height: 30px;
+    width: 30px;
+    flex-shrink: 0;
+    padding: 4px;
+    border: 0;
 }
 </style>
+

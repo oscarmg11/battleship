@@ -4,7 +4,7 @@ import { GameVm } from '@/types/GameVm.js'
 import { getGameFromSessionStorage } from '@/utils/sessionStorage/game/getGameFromSessionStorage.ts'
 import { setGameInSessionStorage } from '@/utils/sessionStorage/game/setGameInSessionStorage.ts'
 
-export const useGameStore = defineStore('fame', () => {
+export const useGameStore: Store = defineStore('game', () => {
     const game = ref<undefined | GameVm>(getGameFromSessionStorage())
 
     function setGame(newGame: GameVm) {
@@ -13,4 +13,9 @@ export const useGameStore = defineStore('fame', () => {
     }
 
     return { game, setGame }
+})
+
+type Store = () => ({
+    game: GameVm | undefined,
+    setGame: (game: GameVm) => void,
 })

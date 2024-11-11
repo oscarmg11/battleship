@@ -14,5 +14,6 @@ export const es = {
     'Join battle': 'Únete a una batalla',
     'Loading': 'Cargando',
     'Error': 'Error',
-    'There was an error, try it later.': 'Ocurrió un error, intentalo más tarde.'
+    'There was an error, try it later.': 'Ocurrió un error, intentalo más tarde.',
+    'Battle: ': 'Batalla: '
 }
