@@ -7,22 +7,25 @@ import Loader from '@/components/Loader.vue'
 import { createGameApi } from '@/api/game/createGameApi'
 import { useNotificationsStore } from '@/stores/useNotificationsStore'
 import { connectHostToGame } from '@/webSocket/game/connectHostToGame'
+import { useGameStore } from '@/stores/useGameStore'
 
 const emit = defineEmits(['onGameCreated'])
 
 const creatingGame = ref(false)
 
-const store = useNotificationsStore()
+const notificationsStore = useNotificationsStore()
+const gameStore = useGameStore()
 
 const createGame = async () => {
     creatingGame.value = true
     try {
         const game = await createGameApi()
         await connectHostToGame(game.gameId)
+        gameStore.setGame(game)
         emit('onGameCreated')
     }catch (e) {
         creatingGame.value = false
-        store.showNotification({
+        notificationsStore.showNotification({
             title: translate('Error'),
             message: translate('There was an error, try it later.')
         })
