@@ -8,6 +8,7 @@ import { connectHostToGame } from '@/webSocket/game/connectHostToGame.js'
 import { useNotificationsStore } from '@/stores/useNotificationsStore.js'
 import { getGameApi } from '@/api/game/getGameApi.js'
 import { useGameStore } from '@/stores/useGameStore.js'
+import { connectRivalToGame } from '@/webSocket/game/connectRivalToGame.js'
 
 const emits = defineEmits<{ (e: 'onSuccess'): void, (e: 'onCancel'): void  }>()
 
@@ -36,7 +37,7 @@ const joinGame = async () => {
             })
             return
         }
-        await connectHostToGame(game.gameId)
+        await connectRivalToGame(game.gameId)
         gameStore.setGame(game)
         emits('onSuccess')
     }catch (e) {

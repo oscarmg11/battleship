@@ -34,7 +34,7 @@ class WebSocketImplementation {
 
 export const webSocket = new WebSocketImplementation()
 
-type EventSent = 'connectHostToGame'
+type EventSent = 'connectHostToGame' | 'connectRivalToGame'
 
 type WebSocketEventMessage = {
     event: WebSocketEvent;
