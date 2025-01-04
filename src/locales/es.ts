@@ -9,7 +9,8 @@ export const es = {
     'Double click on the ships to rotate them.': 'Doble click en los barcos para rotarlos.',
     'Press "Ready" button to start the game.': 'Presiona el botón "Listo" para empezar el juego.',
     'Your ships': 'Tus barcos',
-    'Waiting for opponent': 'Esperando al oponente',
+    'Waiting for rival': 'Esperando al rival',
+    'Rival connected': 'Rival conectado',
     'Create battle': 'Crear batalla',
     'Join battle': 'Únete a una batalla',
     'Loading': 'Cargando',
@@ -17,5 +18,7 @@ export const es = {
     'There was an error, try it later.': 'Ocurrió un error, intentalo más tarde.',
     'Battle: ': 'Batalla: ',
     'Join': 'Unirse',
-    'Go back': 'Regresar'
+    'Go back': 'Regresar',
+    'Joined to battle': 'Te uniste a la batalla',
+    'Reconnecting to battle': 'Reconectando a la batalla'
 }

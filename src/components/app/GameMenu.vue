@@ -5,17 +5,17 @@ import { translate } from '@/utils/text/translate.ts'
 import { ref } from 'vue'
 import { useNotificationsStore } from '@/stores/useNotificationsStore.ts'
 import GameRules from '@/components/app/GameRules.vue'
-import Loader from '@/components/Loader.vue'
 import Text from '@/components/Text.vue'
 import { useGameStore } from '@/stores/useGameStore.js'
 import CopyIcon from '@/icons/CopyIcon.vue'
+import WaitingForRivalLoader from '@/components/app/WaitingForRivalLoader.vue'
 
 const store = useNotificationsStore()
 const gameStore = useGameStore()
 
 const settingUpGame = ref(false)
 const gameReady = ref(false)
-const enemyReady = ref(false)
+
 
 const setupShips = () => {
     if(settingUpGame.value){
@@ -49,7 +49,7 @@ const copyRoomId = () => {
                 <CopyIcon />
             </Button>
         </div>
-        <Loader :size='20' :text="translate('Waiting for opponent')"  v-if='gameReady && !enemyReady' />
+        <WaitingForRivalLoader />
         <Button @click='setupShips' v-if='!gameReady' class='setupButton'>{{ settingUpGame ? translate('Ready') : translate('Setup ships')   }}</Button>
     </nav>
     <GameRules v-if='settingUpGame && !gameReady'  />

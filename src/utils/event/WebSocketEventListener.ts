@@ -6,16 +6,16 @@ import { GameVm } from '@/types/GameVm.js'
 export class WebSocketEventListener extends EventListener {
 
     static addEventListener(event: 'onGameCreated', fn: (game: GameVm) => void): () => void
-    static addEventListener(event: 'onEnemyReady', fn: () => void): () => void
+    static addEventListener(event: 'onRivalConnected', fn: () => void): () => void
     static addEventListener(event: WebSocketEvent, fn: (data: any) => void) {
         return super.addEventListener(event, fn)
     }
 
     static updateEventListener(event: 'onGameCreated', game: GameVm): void
-    static updateEventListener(event: 'onEnemyReady'): void
+    static updateEventListener(event: 'onRivalConnected'): void
     static updateEventListener(event: WebSocketEvent, data?: any) {
         super.updateEventListener(event, data)
     }
 }
 
-export type WebSocketEvent = 'onEnemyReady' | 'onGameCreated'
+export type WebSocketEvent = 'onRivalConnected' | 'onGameCreated'
