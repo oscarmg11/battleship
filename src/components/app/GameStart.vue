@@ -2,16 +2,18 @@
 import Button from '@/components/Button.vue'
 import { translate } from '@/utils/text/translate'
 import Text from '@/components/Text.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import Loader from '@/components/Loader.vue'
 import { createGameApi } from '@/api/game/createGameApi'
 import { useNotificationsStore } from '@/stores/useNotificationsStore'
 import { connectHostToGame } from '@/webSocket/game/connectHostToGame'
 import { useGameStore } from '@/stores/useGameStore'
+import JoinGame from '@/components/app/JoinGame.vue'
 
 const emit = defineEmits(['onGameCreated'])
 
 const creatingGame = ref(false)
+const isJoiningGame = ref(false)
 
 const notificationsStore = useNotificationsStore()
 const gameStore = useGameStore()
@@ -32,24 +34,34 @@ const createGame = async () => {
     }
 }
 
+const showJoinGameForm = () => {
+    isJoiningGame.value = true
+}
+
+const cancelJoinGame = () => {
+    isJoiningGame.value = false
+}
+
 </script>
 
 <template>
     <section class='container'>
-        <article class='actionsContainer'>
-            <Text variant='title'>BATTLESHIP</Text>
+        <Text variant='title'>BATTLESHIP</Text>
+        <article class='actionsContainer' v-if='!isJoiningGame'>
             <Button class='button' @click='createGame' :disabled='creatingGame'>{{ translate('Create battle') }}</Button>
-            <Button class='button' v-if='!creatingGame'>{{ translate('Join battle') }}</Button>
+            <Button class='button' v-if='!creatingGame' @click='showJoinGameForm'>{{ translate('Join battle') }}</Button>
             <div v-if='creatingGame' class='loading'>
                 <Loader :size='20' :text="translate('Loading')" />
             </div>
         </article>
+        <JoinGame v-if='isJoiningGame' @onSuccess='() => emit("onGameCreated")' @onCancel='cancelJoinGame' />
     </section>
 </template>
 
 <style scoped>
 .container {
     display: flex;
+    flex-direction: column;
     position: absolute;
     background-color: black;
     width: 100%;
@@ -67,6 +79,7 @@ const createGame = async () => {
 
 .button {
     width: 20vw;
+    min-width: 200px;
 }
 
 .loading {

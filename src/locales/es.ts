@@ -15,5 +15,7 @@ export const es = {
     'Loading': 'Cargando',
     'Error': 'Error',
     'There was an error, try it later.': 'Ocurrió un error, intentalo más tarde.',
-    'Battle: ': 'Batalla: '
+    'Battle: ': 'Batalla: ',
+    'Join': 'Unirse',
+    'Go back': 'Regresar'
 }
