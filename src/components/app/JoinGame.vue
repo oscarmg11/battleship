@@ -4,11 +4,13 @@ import Input from '@/components/Input.vue'
 import { ref } from 'vue'
 import { translate } from '@/utils/text/translate.js'
 import Button from '@/components/Button.vue'
-import { connectHostToGame } from '@/webSocket/game/connectHostToGame.js'
 import { useNotificationsStore } from '@/stores/useNotificationsStore.js'
 import { getGameApi } from '@/api/game/getGameApi.js'
 import { useGameStore } from '@/stores/useGameStore.js'
 import { connectRivalToGame } from '@/webSocket/game/connectRivalToGame.js'
+import { usePlayerStore } from '@/stores/usePlayerStore.js'
+import { setLastTimePayedInSessionStorage } from '@/utils/sessionStorage/game/setLastTimePayedInSessionStorage'
+import { setIsHostPlayerInSessionStorage } from '@/utils/sessionStorage/player/setIsHostPlayerInSessionStorage'
 
 const emits = defineEmits<{ (e: 'onSuccess'): void, (e: 'onCancel'): void  }>()
 
@@ -17,11 +19,10 @@ const joining = ref(false)
 
 const notificationsStore = useNotificationsStore()
 const gameStore = useGameStore()
+const playerStore = usePlayerStore()
 
 const handleInputChange = (value: string) => {
-    console.log('value.length =', value.length)
     if(value.length > 6) return
-    console.log('roomId.value = ', roomId.value)
     roomId.value = value
 }
 
@@ -39,6 +40,9 @@ const joinGame = async () => {
         }
         await connectRivalToGame(game.gameId)
         gameStore.setGame(game)
+        playerStore.changePlayerToRival()
+        setLastTimePayedInSessionStorage(new Date())
+        setIsHostPlayerInSessionStorage(false)
         emits('onSuccess')
     }catch (e) {
         joining.value = false
