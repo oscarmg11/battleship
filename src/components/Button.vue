@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{ class?: string, disabled?: boolean }>()
+const props = defineProps<{ class?: string, disabled?: boolean, variant?: 'secondary' }>()
 const emit = defineEmits(['click'])
 
 const handleClick = () => {
@@ -8,7 +8,7 @@ const handleClick = () => {
 
 </script>
 <template>
-    <button class="button" :class="props.class" @click="handleClick" :disabled='props.disabled'>
+    <button class="button" :class="props.class" @click="handleClick" :disabled='props.disabled' :data-variant='props.variant'>
         <slot />
     </button>
 </template>
@@ -27,6 +27,11 @@ const handleClick = () => {
     cursor: pointer;
     background-color: white;
     color: black;
+}
+
+.button[data-variant='secondary'] {
+    background-color: black;
+    color: white;
 }
 
 .button:disabled {
