@@ -20,5 +20,7 @@ export const es = {
     'Join': 'Unirse',
     'Go back': 'Regresar',
     'Joined to battle': 'Te uniste a la batalla',
-    'Reconnecting to battle': 'Reconectando a la batalla'
+    'Reconnecting to battle': 'Reconectando a la batalla',
+    'Reconnected': 'Reconectado',
+    'Rival disconnected': 'Rival desconectado',
 }

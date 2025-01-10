@@ -18,6 +18,7 @@ import { getIsHostPlayerInSessionStorage } from '@/utils/sessionStorage/player/g
 import { connectRivalToGame } from '@/webSocket/game/connectRivalToGame'
 import { wait } from '@/utils/promises/wait'
 import { usePlayerStore } from '@/stores/usePlayerStore'
+import { useGameMessagesStore } from '@/stores/useGameMessagesStore'
 
 const emit = defineEmits(['onGameCreated'])
 
@@ -25,6 +26,7 @@ const creatingGame = ref(false)
 const isJoiningGame = ref(false)
 
 const notificationsStore = useNotificationsStore()
+const gameMessagesStore = useGameMessagesStore()
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
 
@@ -49,6 +51,9 @@ const reconnectToGame = async () => {
         await connectRivalToGame(gameToReconnect.gameId)
         playerStore.changePlayerToRival()
     }
+    gameMessagesStore.showGameMessage({
+        message: translate('Reconnected'),
+    })
     gameStore.setGame(gameToReconnect)
     setLastTimePayedInSessionStorage(new Date())
     emit("onGameCreated")
@@ -63,6 +68,11 @@ const createGame = async () => {
         emit('onGameCreated')
         setLastTimePayedInSessionStorage(new Date())
         setIsHostPlayerInSessionStorage(true)
+        gameMessagesStore.showGameMessage({
+            message: translate('Waiting for rival'),
+            loader: true,
+            lastUntilNewMessage: true
+        })
     }catch (e) {
         creatingGame.value = false
         notificationsStore.showNotification({
