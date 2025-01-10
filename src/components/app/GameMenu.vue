@@ -8,7 +8,7 @@ import GameRules from '@/components/app/GameRules.vue'
 import Text from '@/components/Text.vue'
 import { useGameStore } from '@/stores/useGameStore.js'
 import CopyIcon from '@/icons/CopyIcon.vue'
-import WaitingForRivalLoader from '@/components/app/WaitingForRivalLoader.vue'
+import GameMessages from '@/components/app/GameMessages.vue'
 
 const store = useNotificationsStore()
 const gameStore = useGameStore()
@@ -49,7 +49,7 @@ const copyRoomId = () => {
                 <CopyIcon />
             </Button>
         </div>
-        <WaitingForRivalLoader />
+        <GameMessages />
         <Button @click='setupShips' v-if='!gameReady' class='setupButton'>{{ settingUpGame ? translate('Ready') : translate('Setup ships')   }}</Button>
     </nav>
     <GameRules v-if='settingUpGame && !gameReady'  />
