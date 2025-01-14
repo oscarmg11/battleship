@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang='ts'>
 import Button from '@/components/Button.vue'
 import { translate } from '@/utils/text/translate'
 import Text from '@/components/Text.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, defineEmits} from 'vue'
 import Loader from '@/components/Loader.vue'
 import { createGameApi } from '@/api/game/createGameApi'
 import { useNotificationsStore } from '@/stores/useNotificationsStore'
@@ -19,8 +19,17 @@ import { connectRivalToGame } from '@/webSocket/game/connectRivalToGame'
 import { wait } from '@/utils/promises/wait'
 import { usePlayerStore } from '@/stores/usePlayerStore'
 import { useGameMessagesStore } from '@/stores/useGameMessagesStore'
+import { getGameApi } from '@/api/game/getGameApi'
+import { GameVm } from '@/types/GameVm'
+import { setGameInSessionStorage } from '@/utils/sessionStorage/game/setGameInSessionStorage'
+import { clearGameInSessionStorage } from '@/utils/sessionStorage/game/clearGameInSessionStorage'
+import { clearLastTimePayedInSessionStorage } from '@/utils/sessionStorage/game/clearLastTimePayedInSessionStorage.js'
+import { clearSessionStorageData } from '@/utils/sessionStorage/clearSessionStorageData.js'
 
-const emit = defineEmits(['onGameCreated'])
+const emits = defineEmits<{ (e: 'onGameCreated'): void, (e: 'onJoinedToGame'): void }>()
+
+const lastTimePlayed = getLastTimePayedInSessionStorage()
+const leastDateAbleToReconnect = subMinutes(new Date(), 30)
 
 const creatingGame = ref(false)
 const isJoiningGame = ref(false)
@@ -30,19 +39,34 @@ const gameMessagesStore = useGameMessagesStore()
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
 
-const lastTimePlayed = getLastTimePayedInSessionStorage()
-const leastDateAbleToReconnect = subMinutes(new Date(), 30)
-const canReconnectToGame = !!lastTimePlayed && isAfter(lastTimePlayed, leastDateAbleToReconnect)
+const canReconnectToGame = ref(!!lastTimePlayed && isAfter(lastTimePlayed, leastDateAbleToReconnect))
 
 onMounted(() => {
     if(!canReconnectToGame) return
-    reconnectToGame()
+    tryToReconnectToGame()
 })
 
-const reconnectToGame = async () => {
+const tryToReconnectToGame = async () => {
     const gameToReconnect = getGameFromSessionStorage()
     if(!gameToReconnect) return
 
+    try{
+        const updatedGame = await getGameApi({ roomId: gameToReconnect.roomId })
+        if(!updatedGame) throw new Error(translate('Game not found'))
+
+        await reconnectToGame(updatedGame)
+    }catch (e) {
+        notificationsStore.showNotification({
+            title: translate('Reconnection failed'),
+            message: translate('There was an error reconnecting to game, problem: ') + e.message
+        })
+        await wait(1000)
+        canReconnectToGame.value = false
+        clearSessionStorageData()
+    }
+}
+
+const reconnectToGame = async (gameToReconnect: GameVm) => {
     await wait(1000)
     const isHostPlayer = getIsHostPlayerInSessionStorage()
     if(isHostPlayer){
@@ -55,8 +79,9 @@ const reconnectToGame = async () => {
         message: translate('Reconnected'),
     })
     gameStore.setGame(gameToReconnect)
+    setGameInSessionStorage(gameToReconnect)
     setLastTimePayedInSessionStorage(new Date())
-    emit("onGameCreated")
+    emits("onGameCreated")
 }
 
 const createGame = async () => {
@@ -65,7 +90,7 @@ const createGame = async () => {
         const game = await createGameApi()
         await connectHostToGame(game.gameId)
         gameStore.setGame(game)
-        emit('onGameCreated')
+        emits('onGameCreated')
         setLastTimePayedInSessionStorage(new Date())
         setIsHostPlayerInSessionStorage(true)
         gameMessagesStore.showGameMessage({
@@ -105,7 +130,7 @@ const cancelJoinGame = () => {
                 <Loader :size='20' :text="translate('Loading')" />
             </div>
         </article>
-        <JoinGame v-if='isJoiningGame && !canReconnectToGame' @onSuccess='() => emit("onGameCreated")' @onCancel='cancelJoinGame' />
+        <JoinGame v-if='isJoiningGame && !canReconnectToGame' @onSuccess='() => emits("onJoinedToGame")' @onCancel='cancelJoinGame' />
     </section>
 </template>
 

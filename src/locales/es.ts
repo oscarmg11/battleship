@@ -23,4 +23,7 @@ export const es = {
     'Reconnecting to battle': 'Reconectando a la batalla',
     'Reconnected': 'Reconectado',
     'Rival disconnected': 'Rival desconectado',
+    'Connected': 'Conectado',
+    'Game not found': 'Juego no econtrado',
+    'There was an error reconnecting to game, problem: ': 'Hubo un error al reconectar al juego, problema: '
 }
