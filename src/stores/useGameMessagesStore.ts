@@ -3,14 +3,20 @@ import { defineStore } from 'pinia'
 import { GameMessageVm } from '@/types/GameMessageVm.js'
 
 export const useGameMessagesStore = defineStore('gameMessages', () => {
-    const gameMessages = ref<Array<GameMessageVm>>([])
+    const gameMessages = ref<Array<GameMessageVm & { resolve: Function }>>([])
 
-    function showGameMessage(newGameMessage: GameMessageVm) {
-        gameMessages.value.push(newGameMessage)
+    async function showGameMessage(newGameMessage: GameMessageVm) {
+        return new Promise((resolve) => {
+            gameMessages.value.push({
+                ...newGameMessage,
+                resolve
+            })
+        })
     }
 
     function removeOldestMessage() {
-        gameMessages.value.shift()
+        const gameMessage = gameMessages.value.shift()
+        gameMessage?.resolve()
     }
 
     return { gameMessages, showGameMessage, removeOldestMessage }
