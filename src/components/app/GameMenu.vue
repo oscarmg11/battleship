@@ -6,32 +6,21 @@ import { ref } from 'vue'
 import { useNotificationsStore } from '@/stores/useNotificationsStore.ts'
 import GameRules from '@/components/app/GameRules.vue'
 import Text from '@/components/Text.vue'
-import { useGameStore } from '@/stores/useGameStore.js'
+import { useGameStore } from '@/stores/useGameStore'
 import CopyIcon from '@/icons/CopyIcon.vue'
 import GameMessages from '@/components/app/GameMessages.vue'
 
-const store = useNotificationsStore()
+const notificationsStore = useNotificationsStore()
 const gameStore = useGameStore()
 
-const settingUpGame = ref(false)
-const gameReady = ref(false)
-
-
-const setupShips = () => {
-    if(settingUpGame.value){
-        if(game.isGameReadyToStart()){
-            gameReady.value = true
-            return game.finishSetupGame()
-        }
-        store.showNotification({
-            title: translate('Board is not ready'),
-            message: game.getBoardErrorMessage()
-        })
-        return
+const finishSetupShips = () => {
+    if(game.isGameReadyToStart()){
+        return gameStore.finishSetupGame()
     }
-
-    game.setupGame()
-    settingUpGame.value = true
+    notificationsStore.showNotification({
+        title: translate('Board is not ready'),
+        message: game.getBoardErrorMessage()
+    })
 }
 
 const copyRoomId = () => {
@@ -50,9 +39,9 @@ const copyRoomId = () => {
             </Button>
         </div>
         <GameMessages />
-        <Button @click='setupShips' v-if='!gameReady' class='setupButton'>{{ settingUpGame ? translate('Ready') : translate('Setup ships')   }}</Button>
+        <Button @click='finishSetupShips' v-if='gameStore.settingUp' class='setupButton' :disabled='gameStore.disabled'>{{translate('Ready')  }}</Button>
     </nav>
-    <GameRules v-if='settingUpGame && !gameReady'  />
+    <GameRules v-if='gameStore.settingUp'  />
 </template>
 
 <style scoped>
