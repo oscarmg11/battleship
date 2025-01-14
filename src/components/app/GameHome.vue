@@ -22,11 +22,10 @@ import { useGameMessagesStore } from '@/stores/useGameMessagesStore'
 import { getGameApi } from '@/api/game/getGameApi'
 import { GameVm } from '@/types/GameVm'
 import { setGameInSessionStorage } from '@/utils/sessionStorage/game/setGameInSessionStorage'
-import { clearGameInSessionStorage } from '@/utils/sessionStorage/game/clearGameInSessionStorage'
-import { clearLastTimePayedInSessionStorage } from '@/utils/sessionStorage/game/clearLastTimePayedInSessionStorage.js'
-import { clearSessionStorageData } from '@/utils/sessionStorage/clearSessionStorageData.js'
+import { clearSessionStorageData } from '@/utils/sessionStorage/clearSessionStorageData'
+import { isGameSettingUp } from '@/utils/game/gameStatus/isGameSettingUp'
 
-const emits = defineEmits<{ (e: 'onGameCreated'): void, (e: 'onJoinedToGame'): void }>()
+const emits = defineEmits<{ (e: 'onGameCreated', { isGameSettingUp }?: { isGameSettingUp: boolean }): void, (e: 'onJoinedToGame'): void }>()
 
 const lastTimePlayed = getLastTimePayedInSessionStorage()
 const leastDateAbleToReconnect = subMinutes(new Date(), 30)
@@ -72,7 +71,10 @@ const reconnectToGame = async (gameToReconnect: GameVm) => {
     if(isHostPlayer){
         await connectHostToGame(gameToReconnect.gameId)
     } else {
-        await connectRivalToGame(gameToReconnect.gameId)
+        await connectRivalToGame({
+            gameId: gameToReconnect.gameId,
+            rivalPlayerId: playerStore.player.playerId
+        })
         playerStore.changePlayerToRival()
     }
     gameMessagesStore.showGameMessage({
@@ -81,13 +83,15 @@ const reconnectToGame = async (gameToReconnect: GameVm) => {
     gameStore.setGame(gameToReconnect)
     setGameInSessionStorage(gameToReconnect)
     setLastTimePayedInSessionStorage(new Date())
-    emits("onGameCreated")
+    emits("onGameCreated", { isGameSettingUp: isGameSettingUp(gameToReconnect.gameStatus) })
 }
 
 const createGame = async () => {
     creatingGame.value = true
     try {
-        const game = await createGameApi()
+        const game = await createGameApi({
+            playerId: playerStore.player.playerId,
+        })
         await connectHostToGame(game.gameId)
         gameStore.setGame(game)
         emits('onGameCreated')
