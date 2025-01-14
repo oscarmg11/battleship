@@ -17,6 +17,7 @@ class Game {
     }
 
     setupGame() {
+        console.log('here inside class = ', this.disabled)
         if(this.disabled) return
 
         this.settingUp = true
