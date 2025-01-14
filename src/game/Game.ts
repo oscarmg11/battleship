@@ -6,6 +6,7 @@ import { EnemyBoard } from '@/game/EnemyBoard.ts'
 class Game {
     private mainBoard: MainBoard
     private settingUp = false
+    private disabled = true
 
     constructor() {
         const mainBoard = new MainBoard()
@@ -16,6 +17,8 @@ class Game {
     }
 
     setupGame() {
+        if(this.disabled) return
+
         this.settingUp = true
         camera.moveTo({ x: 0, y: 15, z: 0 }, { x: 0, y: 0, z: 0})
         scene.addElementsToTrack(this.mainBoard.getShipElements() ?? [])
@@ -35,6 +38,14 @@ class Game {
         camera.moveToInitialPosition()
         scene.clearElementsToTrack()
         this.mainBoard.endEditing()
+    }
+
+    enable() {
+        this.disabled = false
+    }
+
+    disable() {
+        this.disabled = true
     }
 
 }
