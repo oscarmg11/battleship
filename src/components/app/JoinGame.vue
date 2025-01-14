@@ -38,7 +38,10 @@ const joinGame = async () => {
             })
             return
         }
-        await connectRivalToGame(game.gameId)
+        await connectRivalToGame({
+            gameId: game.gameId,
+            rivalPlayerId: playerStore.player.playerId
+        })
         gameStore.setGame(game)
         playerStore.changePlayerToRival()
         setLastTimePayedInSessionStorage(new Date())
