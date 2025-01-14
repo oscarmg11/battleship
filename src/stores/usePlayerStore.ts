@@ -7,6 +7,7 @@ import { setIsHostPlayerInSessionStorage } from '@/utils/sessionStorage/player/s
 export const usePlayerStore: Store = defineStore('player', () => {
     const player = ref<PlayerVm>({
         isHost: true,
+        playerId: ''
     })
 
     const session = ref<SessionVm | undefined>(undefined)
@@ -25,7 +26,11 @@ export const usePlayerStore: Store = defineStore('player', () => {
         session.value = newSession
     }
 
-    return { player, session, changePlayerToRival, changePlayerToHost, setSession }
+    function setPlayerId(playerId: string) {
+        player.value.playerId = playerId
+    }
+
+    return { player, session, changePlayerToRival, changePlayerToHost, setSession, setPlayerId }
 })
 
 type Store = () => ({
@@ -34,4 +39,5 @@ type Store = () => ({
     changePlayerToRival: () => void,
     changePlayerToHost: () => void,
     setSession: (session: SessionVm) => void,
+    setPlayerId: (playerId: string) => void,
 })
