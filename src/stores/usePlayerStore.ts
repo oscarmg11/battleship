@@ -1,20 +1,37 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { PlayerVm } from '@/types/PlayerVm.ts'
+import type { PlayerVm } from '@/types/PlayerVm.ts'
+import type { SessionVm } from '@/types/SessionVm.ts'
+import { setIsHostPlayerInSessionStorage } from '@/utils/sessionStorage/player/setIsHostPlayerInSessionStorage.js'
 
 export const usePlayerStore: Store = defineStore('player', () => {
     const player = ref<PlayerVm>({
-        isHost: true
+        isHost: true,
     })
+
+    const session = ref<SessionVm | undefined>(undefined)
 
     function changePlayerToRival() {
         player.value.isHost = false
+        setIsHostPlayerInSessionStorage(false)
     }
 
-    return { player, changePlayerToRival }
+    function changePlayerToHost() {
+        player.value.isHost = true
+        setIsHostPlayerInSessionStorage(true)
+    }
+
+    function setSession(newSession: SessionVm) {
+        session.value = newSession
+    }
+
+    return { player, session, changePlayerToRival, changePlayerToHost, setSession }
 })
 
 type Store = () => ({
     player: PlayerVm,
+    session: SessionVm | undefined,
     changePlayerToRival: () => void,
+    changePlayerToHost: () => void,
+    setSession: (session: SessionVm) => void,
 })

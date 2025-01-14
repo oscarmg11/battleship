@@ -6,6 +6,7 @@ class WebSocketImplementation {
         const webSocketConnection = new WebSocket(import.meta.env.VITE_WEBSOCKET_URI)
         webSocketConnection.onopen = (event) => {
             console.log('WebSocket connected');
+            this.sendEvent('requestSessionInfo')
         };
 
         webSocketConnection.onmessage = (event: MessageEvent<string>) => {
@@ -34,7 +35,7 @@ class WebSocketImplementation {
 
 export const webSocket = new WebSocketImplementation()
 
-type EventSent = 'connectHostToGame' | 'connectRivalToGame'
+type EventSent = 'connectHostToGame' | 'connectRivalToGame' | 'requestSessionInfo'
 
 type WebSocketEventMessage = {
     event: WebSocketEvent;
